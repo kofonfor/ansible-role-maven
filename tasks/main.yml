@@ -1,0 +1,19 @@
+---
+- name: automatically extract and set the major version
+  set_fact:
+    maven_major_version: "{{ maven_version | regex_replace('^(.*?)\\.(.*)$', '\\1') }}"
+
+- name: print the major version
+  debug: var=maven_major_version
+
+- name: download Maven "{{ maven_major_version }}"
+  command: bash -c "cd /root && wget http://apache-mirror.rbc.ru/pub/apache/maven/maven-{{ maven_major_version }}/{{ maven_version }}/binaries/apache-maven-{{ maven_version }}-bin.tar.gz" creates="/root/apache-maven-{{ maven_version }}-bin.tar.gz"
+
+- name: unpack Maven
+  command: bash -c "cd /opt && tar xzf /root/apache-maven-{{ maven_version }}-bin.tar.gz" creates=/opt/apache-maven-{{ maven_version }}
+
+- name: make an apache-maven link
+  file: state=link src="/opt/apache-maven-{{ maven_version }}" dest="/opt/apache-maven{{ maven_major_version }}"
+
+- name: make a maven link
+  file: state=link src="/opt/apache-maven{{ maven_major_version }}" dest="/opt/maven{{ maven_major_version }}"
